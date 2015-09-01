@@ -24,13 +24,23 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
 
     protected class Line {
 
-        float x1;
-        float y1;
-        float z1;
-        float x2;
-        float y2;
-        float z2;
+        float[] p0 = new float[Axis.values().length];
+        float[] p1 = new float[Axis.values().length];
         Color color;
+
+        public Line() {
+
+        }
+
+        public Line(float[] p0, float[] p1) {
+            this(p0, p1, Color.BLACK);
+        }
+
+        public Line(float[] p0, float[] p1, Color c) {
+            System.arraycopy(p0, 0, this.p0, 0, this.p0.length);
+            System.arraycopy(p1, 0, this.p1, 0, this.p1.length);
+            color = c;
+        }
     }
 
     protected float[] coordinates = new float[3];
@@ -98,13 +108,6 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
      * Remove the last drawn line
      */
     public abstract void removeLastLine();
-
-    /**
-     * Set the Viewing Panel Mode (XY,XZ,YZ)
-     *
-     * @param Mode Viewing Mode
-     */
-    public abstract void setMode(int Mode);
 
     /**
      * Remove the drawing Line by index
