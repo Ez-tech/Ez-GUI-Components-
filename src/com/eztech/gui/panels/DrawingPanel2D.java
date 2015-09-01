@@ -26,7 +26,7 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
     float[] minValues = new float[axises.length];
     JScrollPane scroller;
     Rule rulerX, rulerY;
-    GradientDepthPanel gradientPanel;
+    GradientDepthPanel depthPanel;
     JLabel lCoordinates = new JLabel("X = 0, Y= 0, Z = 0");
 
     public DrawingPanel2D() {
@@ -58,7 +58,7 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
     }
 
     public void addGradientPanel(GradientDepthPanel gradientPanel) {
-        this.gradientPanel = gradientPanel;
+        this.depthPanel = gradientPanel;
         if (gradientPanel.isVertical) {
             add(gradientPanel, BorderLayout.EAST);
         } else {
@@ -233,10 +233,10 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
                 axises[2], z);
         drawingPane.setToolTipText(sCoord);
         lCoordinates.setText(sCoord);
-        if (gradientPanel != null) {
-            gradientPanel.setMaxValue(maxValues[axises[2].index]);
-            gradientPanel.setMinValue(minValues[axises[2].index]);
-            gradientPanel.setActualValue(z);
+        if (depthPanel != null) {
+            depthPanel.setMaxValue(maxValues[axises[2].index]);
+            depthPanel.setMinValue(minValues[axises[2].index]);
+            depthPanel.setActualValue(z);
         }
         rulerY.setValue(e.getY());
         rulerX.setValue(e.getX());
