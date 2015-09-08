@@ -53,7 +53,7 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
         rulerY.setMinValue(-offsetY);
         //Lay out this demo.
         add(scroller, BorderLayout.CENTER);
-        add(lCoordinates, BorderLayout.SOUTH);
+        add(lCoordinates, BorderLayout.PAGE_END);
         startRendering();
     }
 
@@ -62,7 +62,7 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
         if (gradientPanel.isVertical) {
             add(gradientPanel, BorderLayout.EAST);
         } else {
-            add(gradientPanel, BorderLayout.SOUTH);
+            add(gradientPanel, BorderLayout.PAGE_START);
         }
     }
 

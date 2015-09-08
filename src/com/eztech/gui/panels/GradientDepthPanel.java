@@ -76,7 +76,6 @@ public class GradientDepthPanel extends JPanel {
         if (!Float.isNaN(actualValue)) {
             g2d.setColor(Color.ORANGE);
             if (isVertical) {
-                System.out.println(mapValueToLength(actualValue)+"  ,  "+h);
                 g2d.fillRect(0, mapValueToLength(actualValue)-3, w, 6);
             } else {
                 g2d.fillRect(mapValueToLength(actualValue)-3, 0, 6, h);
