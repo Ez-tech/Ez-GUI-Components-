@@ -5,6 +5,7 @@
  */
 package com.eztech.gui.panels;
 
+import com.eztech.gui.util.Line;
 import java.awt.Color;
 import java.util.ArrayList;
 import javax.swing.JPanel;
@@ -21,28 +22,6 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
      * Mode Of Viewing The G-code Viewing Panel
      */
     public static final byte YX = 0, ZX = 1, ZY = 2;
-
-    protected class Line {
-
-        float[] p0 = new float[Axis.values().length];
-        float[] p1 = new float[Axis.values().length];
-        Color color;
-
-        public Line() {
-
-        }
-
-        public Line(float[] p0, float[] p1) {
-            this(p0, p1, Color.BLACK);
-        }
-
-        public Line(float[] p0, float[] p1, Color c) {
-            System.arraycopy(p0, 0, this.p0, 0, this.p0.length);
-            System.arraycopy(p1, 0, this.p1, 0, this.p1.length);
-            color = c;
-        }
-    }
-
     protected float[] coordinates = new float[3];
     protected ArrayList<Line> lines;
     protected boolean changeFlag = true;
@@ -107,14 +86,19 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
     /**
      * Remove the last drawn line
      */
-    public abstract void removeLastLine();
+    public void removeLastLine() {
+        removeLine(lines.size() - 1);
+    }
 
     /**
      * Remove the drawing Line by index
      *
      * @param index the index of the line to be removed
      */
-    public abstract void removeLine(int index);
+    public void removeLine(int index) {
+        lines.remove(index);
+        changeFlag = true;
+    }
 
     /**
      * Redraw The Viewing Panel

@@ -13,7 +13,7 @@ public enum Axis {
     X(0),
     Y(1),
     Z(2);
-    int index;
+    public int index;
 
     private Axis(int index) {
         this.index = index;

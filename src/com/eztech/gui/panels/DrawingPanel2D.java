@@ -5,55 +5,38 @@ package com.eztech.gui.panels;
  * a tutorial reader.
  */
 import com.eztech.gui.Rule;
+import com.eztech.gui.util.Line;
 import com.eztech.gui.util.Utilities;
-import static com.eztech.gui.util.Utilities.mapValueToColor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.util.*;
 
 /* ScrollDemo2.java requires no other files. */
 public class DrawingPanel2D extends DrawingPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
-    private final Dimension area; //indicates area taken up by graphics
-    private DrawingPane drawingPane;
+    private final DrawingPane drawingPane;
     Rectangle workingArea, SpecimenArea;
-    private float scale = 1, MintScale = (float) 0.1;
+    private float scale = 1, MintScale = 0.1f;
     private int offsetX = 50, offsetY = 50;
-    private Axis[] axises = {Axis.X, Axis.Y, Axis.Z};
+    private final Axis[] axises = {Axis.X, Axis.Y, Axis.Z};
     float[] maxValues = new float[axises.length];
     float[] minValues = new float[axises.length];
-    JScrollPane scroller;
-    Rule rulerX, rulerY;
+    boolean linesChanged = true;
     GradientDepthPanel depthPanel;
-    JLabel lCoordinates = new JLabel("X = 0, Y= 0, Z = 0");
 
     public DrawingPanel2D() {
         super();
         setLayout(new BorderLayout());
-        area = new Dimension(0, 0);
         lines = new ArrayList<>();
         //Set up the drawing area.
         drawingPane = new DrawingPane();
-        drawingPane.setBackground(Color.white);
         drawingPane.addMouseListener(this);
         drawingPane.addMouseMotionListener(this);
         drawingPane.addMouseWheelListener(this);
         //Put the drawing area in a scroll pane.
-        scroller = new JScrollPane(drawingPane);
-        scroller.setPreferredSize(new Dimension(300, 500));
-        rulerX = new Rule(Rule.HORIZONTAL, true);
-        rulerY = new Rule(Rule.VERTICAL, true);
-        rulerX.setPreferredWidth(320);
-        rulerY.setPreferredHeight(480);
-        //scroller.setColumnHeaderView(rulerX);
-        //scroller.setRowHeaderView(rulerY);
-        rulerX.setMinValue(-offsetX);
-        rulerY.setMinValue(-offsetY);
-        //Lay out this demo.
-        add(scroller, BorderLayout.CENTER);
-        add(lCoordinates, BorderLayout.PAGE_END);
+        drawingPane.setPreferredSize(new Dimension(200, 200));
+        add(drawingPane, BorderLayout.CENTER);
         startRendering();
     }
 
@@ -74,38 +57,57 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
         final Color backGround = Color.WHITE;
         final Color originAxis = Color.ORANGE;
         final Color coordinatesColor = Color.BLUE;
-        BufferedImage bImage;
+        LinesImage linesimg;
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            bImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-            Graphics2D imageGraphics = bImage.createGraphics();
-            imageGraphics.setColor(backGround);
-            imageGraphics.fillRect(0, 0, getWidth(), getHeight());
-            imageGraphics.translate(offsetX, drawingPane.getHeight() - offsetY);
-            imageGraphics.setColor(originAxis);
-            imageGraphics.drawLine(0, 0, 200, 0);
-            imageGraphics.drawLine(0, -200, 0, 0);
-            imageGraphics.setColor(coordinatesColor);
-            int x = (int) (coordinates[axises[0].index] * scale);
-            int y = (int) (coordinates[axises[1].index] * scale);
-            imageGraphics.drawLine(-5 + x, -y, 5 + x, -y);
-            imageGraphics.drawLine(x, 5 - y, x, -5 - y);
-            lines.forEach((l) -> {
-                int x1 = (int) (l.p0[axises[0].index] * scale);
-                int y1 = (int) (l.p0[axises[1].index] * scale);
-                int x2 = (int) (l.p1[axises[0].index] * scale);
-                int y2 = (int) (l.p1[axises[1].index] * scale);
-                if (l.color == null) {
-                    l.color = mapValueToColor(l.p1[axises[2].index],
-                            minValues[axises[2].index],
-                            maxValues[axises[2].index]);
+            //Clear BackGround
+            g.setColor(backGround);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            //Translate to get normal Coordinates
+            g.translate(offsetX, drawingPane.getHeight() - offsetY);
+            if (!lines.isEmpty()) {
+                if (linesChanged) {
+                    linesimg = new LinesImage(lines, axises, minValues, maxValues);
+                    linesChanged = false;
                 }
-                imageGraphics.setColor(l.color);
-                imageGraphics.drawLine(x1, -y1, x2, -y2);
-            });
-            g.drawImage(bImage, 0, 0, null);
+                Image linesScaledImage = linesimg.getScaledImage(scale);
+                g.drawImage(linesScaledImage,
+                        (int) (minValues[axises[0].index] * scale),
+                        (int) (-minValues[axises[1].index] * scale - linesScaledImage.getHeight(null)),
+                        null);
+            }
+            //Draw Origins Axis
+            g.setColor(originAxis);
+            g.drawLine(0, 0, 200, 0);
+            g.drawLine(0, -200, 0, 0);
+            g.setColor(coordinatesColor);
+            //Draw Current Coordinates
+            int xCoord = (int) (coordinates[axises[0].index] * scale);
+            int yCoord = (int) (coordinates[axises[1].index] * scale);
+            g.drawLine(-5 + xCoord, -yCoord, 5 + xCoord, -yCoord);
+            g.drawLine(xCoord, 5 - yCoord, xCoord, -5 - yCoord);
+            Point p = getMousePosition();
+            if (p != null) {
+                float xMouse = ((float) p.getX() - offsetX) / scale;
+                float yMouse = (drawingPane.getHeight() - (float) p.getY() - offsetY) / scale;
+                Color zc = Color.white;
+                if (linesimg != null) {
+                    zc = new Color(linesimg.getRGB(xMouse, yMouse));
+                }
+                float zMouse = Utilities.mapColorToValue(zc, minValues[axises[2].index], maxValues[axises[2].index]);
+                String sCoord = String.format("%s=%.1f, %s=%.1f, %s=%.1f",
+                        axises[0], xMouse,
+                        axises[1], yMouse,
+                        axises[2], zMouse);
+                if (depthPanel != null) {
+                    depthPanel.setMaxValue(maxValues[axises[2].index]);
+                    depthPanel.setMinValue(minValues[axises[2].index]);
+                    depthPanel.setActualValue(zMouse);
+                }
+                g.drawString(sCoord, 5 - offsetX, offsetY - 5);
+            }
         }
     }
 
@@ -119,8 +121,6 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
         offsetX += x;
         offsetY += y;
         this.getGraphics().translate(offsetX, drawingPane.getHeight() - offsetY);
-        rulerX.setMinValue(-offsetX);
-        rulerY.setMinValue(-offsetY);
         changeFlag = true;
     }
 
@@ -133,8 +133,6 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
         }
         offsetX = (int) (xp - scale * xr);
         offsetY = (int) (Hy - yp - scale * yr);
-        rulerY.setScale(scale);
-        rulerX.setScale(scale);
         changeFlag = true;
     }
 
@@ -147,29 +145,24 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
             minValues[i] = Math.min(minValues[i], Math.min(p0[i], p1[i]));
         }
         changeFlag = true;
+        linesChanged = true;
     }
 
     @Override
     public void removeLine(int index) {
-        lines.remove(index);
-        changeFlag = true;
-    }
-
-    @Override
-    public void removeLastLine() {
-        removeLine(lines.size() - 1);
+        super.removeLine(index);
+        linesChanged = true;
     }
 
     public void setAxis(Axis... axis) {
         System.arraycopy(axis, 0, this.axises, 0, axis.length);
+        linesChanged = true;
         changeFlag = true;
     }
 
     @Override
     public void clearScrean() {
         lines.clear();
-        area.width = 0;
-        area.height = 0;
         Arrays.fill(maxValues, 1);
         Arrays.fill(minValues, 0);
         changeFlag = true;
@@ -198,13 +191,11 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
     @Override
     public void mouseReleased(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
-            //This will clear the graphic objects.
             clearScrean();
         } else if (SwingUtilities.isMiddleMouseButton(e)) {
             scale = 1;
             offsetX = 50;
             offsetY = 50;
-            rulerX.setMinValue(-offsetX);
         }
     }
 
@@ -223,22 +214,6 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        float x = (e.getX() - offsetX) / scale;
-        float y = (drawingPane.getHeight() - e.getY() - offsetY) / scale;
-        Color zc = new Color(drawingPane.bImage.getRGB(e.getX(), e.getY()));
-        float z = Utilities.mapColorToValue(zc, minValues[axises[2].index], maxValues[axises[2].index]);
-        String sCoord = String.format("%s=%.1f, %s=%.1f, %s=%.1f",
-                axises[0], x,
-                axises[1], y,
-                axises[2], z);
-        drawingPane.setToolTipText(sCoord);
-        lCoordinates.setText(sCoord);
-        if (depthPanel != null) {
-            depthPanel.setMaxValue(maxValues[axises[2].index]);
-            depthPanel.setMinValue(minValues[axises[2].index]);
-            depthPanel.setActualValue(z);
-        }
-        rulerY.setValue(e.getY());
-        rulerX.setValue(e.getX());
+        changeFlag = true;
     }
 }

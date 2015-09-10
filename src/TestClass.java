@@ -24,6 +24,8 @@ public class TestClass {
                 DrawingPanel2D newContentPane;
                 JFrame frame = new JFrame("Drawing Test");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setLocationRelativeTo(null);
+                frame.setSize(500,500);
                 //Create and set up the content pane.
                 newContentPane = new DrawingPanel2D();
                 newContentPane.setCoordinates(10, 50, 0);
@@ -33,7 +35,6 @@ public class TestClass {
                 newContentPane.addGradientPanel(new GradientDepthPanel(true));
                 frame.setContentPane(newContentPane);
                 //Display the window.
-                frame.pack();
                 frame.setVisible(true);
             }
         });
