@@ -4,7 +4,6 @@ package com.eztech.gui.panels;
  * This code is based on an example provided by John Vella,
  * a tutorial reader.
  */
-import com.eztech.gui.Rule;
 import com.eztech.gui.util.Line;
 import com.eztech.gui.util.Utilities;
 import javax.swing.*;
@@ -69,7 +68,7 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
             g.translate(offsetX, drawingPane.getHeight() - offsetY);
             if (!lines.isEmpty()) {
                 if (linesChanged) {
-                    linesimg = new LinesImage(lines, axises, minValues, maxValues);
+                    linesimg = new LinesImage(lines, axises, minValues, maxValues,scale);
                     linesChanged = false;
                 }
                 Image linesScaledImage = linesimg.getScaledImage(scale);
@@ -137,12 +136,11 @@ public class DrawingPanel2D extends DrawingPanel implements MouseListener, Mouse
     }
 
     @Override
-    public void addLine(float[] p0, float[] p1, Color c) {
-        Line l = new Line(p0, p1, c);
-        lines.add(l);
+    public void addLine(Line line) {
+        lines.add(line);
         for (int i = 0; i < axises.length; i++) {
-            maxValues[i] = Math.max(maxValues[i], Math.max(p0[i], p1[i]));
-            minValues[i] = Math.min(minValues[i], Math.min(p0[i], p1[i]));
+            maxValues[i] = Math.max(maxValues[i], Math.max(line.p0[i], line.p1[i]));
+            minValues[i] = Math.min(minValues[i], Math.min(line.p0[i], line.p1[i]));
         }
         changeFlag = true;
         linesChanged = true;

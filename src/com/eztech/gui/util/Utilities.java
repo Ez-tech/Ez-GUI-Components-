@@ -8,6 +8,8 @@ package com.eztech.gui.util;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -43,5 +45,25 @@ public class Utilities {
             value = (blue * (max - min) / 255) + min;
         }
         return value;
+    }
+
+    public static float[] getMaximumValues(List<Line> lines) {
+        float[] maxValues = Arrays.copyOf(lines.get(0).p0, lines.get(0).p0.length);
+        lines.forEach(line -> {
+            for (int i = 0; i < line.p0.length; i++) {
+                maxValues[i] = Math.max(maxValues[i], Math.max(line.p0[i], line.p1[i]));
+            }
+        });
+        return maxValues;
+    }
+
+    public static float[] getMinimumValues(List<Line> lines) {
+        float[] minValues = Arrays.copyOf(lines.get(0).p0, lines.get(0).p0.length);
+        lines.forEach(line -> {
+            for (int i = 0; i < line.p0.length; i++) {
+                minValues[i] = Math.min(minValues[i], Math.min(line.p0[i], line.p1[i]));
+            }
+        });
+        return minValues;
     }
 }

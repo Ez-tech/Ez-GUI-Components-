@@ -8,6 +8,7 @@ package com.eztech.gui.panels;
 import com.eztech.gui.util.Line;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 
 /**
@@ -48,11 +49,17 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
     /**
      * Add a line to draw it o the screen
      *
-     * @param p1
-     * @param p2
-     * @param c Color of the line
+     * @param line
      */
-    public abstract void addLine(float[] p1, float[] p2, Color c);
+    public abstract void addLine(Line line);
+    
+    public void addLine(float[] p0, float[] p1, Color c) {
+        addLine(new Line(p0, p1, c));
+    }
+    
+    public void addLines(List<Line> lines) {
+        lines.forEach(line -> addLine(line));
+    }
 
     public void addLine(float[] p1, float[] p2) {
         addLine(p1, p2, null);
@@ -65,7 +72,6 @@ public abstract class DrawingPanel extends JPanel implements Runnable {
      * @param c list of the colors of the lines
      */
     public void addLines(float[][] lines, Color[] c) {
-
         for (int i = 1; i < lines.length; i += 2) {
             addLine(lines[i - 1], lines[i], c[i / 2]);
         }
