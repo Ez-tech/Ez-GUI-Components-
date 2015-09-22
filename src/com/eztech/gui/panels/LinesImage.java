@@ -14,6 +14,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class LinesImage {
     final float[] minValues;
     final float[] maxValues;
     final float realWidth, realheight;
-    final List<Line> lines;
+    final List<Line> lines = new ArrayList<>();
     BufferedImage img;
     float scale = 2;
 
@@ -44,7 +45,7 @@ public class LinesImage {
         this.maxValues = maxValues;
         this.minValues = minValues;
         this.axises = axises;
-        this.lines = lines;
+        this.lines.addAll(lines);
         this.realWidth = maxValues[axises[0].index] - minValues[axises[0].index];
         this.realheight = maxValues[axises[1].index] - minValues[axises[1].index];
         this.scale = scale;
@@ -75,22 +76,23 @@ public class LinesImage {
         imageGraphics.setColor(backGround);
         imageGraphics.fillRect(0, 0, img.getWidth(), img.getHeight());
         imageGraphics.translate(0, img.getHeight());
-        BasicStroke scaledStroke = new BasicStroke(2 + scale);
-        BasicStroke normStroke = new BasicStroke(1 + scale / 8);
-        lines.forEach((l) -> {
+        BasicStroke scaledStroke = new BasicStroke(2 + scale/8);
+        BasicStroke normStroke = new BasicStroke(2);
+        lines.stream().forEach((l) -> {
             float x1 = (l.p0[axises[0].index] - minValues[axises[0].index]) * scale;
             float y1 = (l.p0[axises[1].index] - minValues[axises[1].index]) * scale;
             float x2 = (l.p1[axises[0].index] - minValues[axises[0].index]) * scale;
             float y2 = (l.p1[axises[1].index] - minValues[axises[1].index]) * scale;
+            Color c = l.color;
             if (l.color == null) {
                 imageGraphics.setStroke(scaledStroke);
-                l.color = mapValueToColor(l.p1[axises[2].index],
+                c = mapValueToColor(l.p1[axises[2].index],
                         minValues[axises[2].index],
                         maxValues[axises[2].index]);
             } else {
                 imageGraphics.setStroke(normStroke);
             }
-            imageGraphics.setColor(l.color);
+            imageGraphics.setColor(c);
             imageGraphics.draw(new Line2D.Float(x1, -y1, x2, -y2));
         });
     }
